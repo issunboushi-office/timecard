@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#d5dbe3">
 <title>シフト・タイムカード</title>
 <style>
   html, body { height: 100%; margin: 0; background: #f4f5f7; }
@@ -13,13 +13,16 @@
     display: flex; flex-direction: column;
     font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif; color: #1f2933;
   }
-  #tabs { display: none; background: #fff; border-bottom: 1px solid #d9dee4; flex: none; }
+  /* 上のタブ（見出しのついたファイルのタブのような見た目） */
+  #tabs { display: none; flex: none; gap: 4px; padding: 8px 8px 0; background: #d5dbe3; }
   #tabs.on { display: flex; }
   #tabs a {
-    flex: 1; text-align: center; padding: 13px 0 11px; font-size: 15px; font-weight: 700;
-    color: #7b8794; text-decoration: none; border-bottom: 3px solid transparent;
+    flex: 1; text-align: center; padding: 9px 0 8px; font-size: 15px; font-weight: 700;
+    color: #52606d; text-decoration: none; background: #e9edf2;
+    border: 1px solid #c3cad3; border-bottom: 0; border-top: 3px solid transparent;
+    border-radius: 10px 10px 0 0;
   }
-  #tabs a.cur { color: #2f5d9e; border-bottom-color: #2f5d9e; }
+  #tabs a.cur { color: #1f2933; background: #f4f5f7; border-top-color: #2f5d9e; position: relative; top: 1px; }
   #frame { display: none; border: 0; width: 100%; flex: 1; min-height: 0; }
   #note { max-width: 420px; margin: 0 auto; padding: 40px 20px; line-height: 1.8; }
   #note h1 { font-size: 18px; margin: 0 0 12px; }
