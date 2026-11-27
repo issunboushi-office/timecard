@@ -5,20 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#f4f5f7">
-<title>タイムカード</title>
+<meta name="theme-color" content="#ffffff">
+<title>シフト・タイムカード</title>
 <style>
   html, body { height: 100%; margin: 0; background: #f4f5f7; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif; color: #1f2933; }
-  #frame { display: none; border: 0; width: 100%; height: 100%; }
+  body {
+    display: flex; flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif; color: #1f2933;
+  }
+  #tabs { display: none; background: #fff; border-bottom: 1px solid #d9dee4; flex: none; }
+  #tabs.on { display: flex; }
+  #tabs a {
+    flex: 1; text-align: center; padding: 13px 0 11px; font-size: 15px; font-weight: 700;
+    color: #7b8794; text-decoration: none; border-bottom: 3px solid transparent;
+  }
+  #tabs a.cur { color: #2f5d9e; border-bottom-color: #2f5d9e; }
+  #frame { display: none; border: 0; width: 100%; flex: 1; min-height: 0; }
   #note { max-width: 420px; margin: 0 auto; padding: 40px 20px; line-height: 1.8; }
   #note h1 { font-size: 18px; margin: 0 0 12px; }
 </style>
 </head>
 <body>
-<iframe id="frame" title="タイムカード"></iframe>
+<nav id="tabs">
+  <a href="#" id="tab-shift">シフト</a>
+  <a href="#" id="tab-punch">タイムカード</a>
+</nav>
+<iframe id="frame" title="シフト・タイムカード"></iframe>
 <div id="note">
-  <h1>タイムカード</h1>
+  <h1>シフト・タイムカード</h1>
   <p id="text">読み込み中…</p>
 </div>
 
@@ -27,12 +41,21 @@
   var APP_URL = 'https://script.google.com/macros/s/AKfycbzAuQXLWWKPN6WS2DY6tHDVxcsqeb90YGtCnwhmRY67_3PprKRu7Yg5px533XSHi4KW/exec';
   // ▲ 変えるのはこの1行だけ
 
+  // リンクの形
+  //   シフト（最初の画面）   …/timecard/?k=合言葉
+  //   タイムカード           …/timecard/?k=合言葉&p=punch
+  //   見るだけの人（部長など）…/timecard/?k=合言葉&r=v   ← タブを出さず、シフトだけ表示
+
   (function () {
     var text = document.getElementById('text');
     var frame = document.getElementById('frame');
+    var tabs = document.getElementById('tabs');
+    var params = new URLSearchParams(location.search);
 
-    // 自分専用リンクの合言葉（?k=…）を読み取る。半角英数字以外は取りのぞく
-    var key = (new URLSearchParams(location.search).get('k') || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 64);
+    // 合言葉（?k=…）。半角英数字以外は取りのぞく
+    var key = (params.get('k') || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 64);
+    var viewOnly = params.get('r') === 'v';
+    var page = (!viewOnly && params.get('p') === 'punch') ? 'punch' : 'shift';
 
     if (APP_URL.indexOf('https://script.google.com/') !== 0) {
       text.textContent = '設定がまだ終わっていません（ウェブアプリのURLが入っていません）。';
@@ -43,9 +66,25 @@
       return;
     }
 
-    frame.src = APP_URL + (APP_URL.indexOf('?') >= 0 ? '&' : '?') + 'k=' + encodeURIComponent(key);
+    function show(p) {
+      page = p;
+      frame.src = APP_URL + (APP_URL.indexOf('?') >= 0 ? '&' : '?') +
+        'k=' + encodeURIComponent(key) + '&page=' + p;
+      document.getElementById('tab-shift').className = p === 'shift' ? 'cur' : '';
+      document.getElementById('tab-punch').className = p === 'punch' ? 'cur' : '';
+      document.title = p === 'punch' ? 'タイムカード' : 'シフト';
+      // アドレスも合わせておく（そのままホーム画面に追加できるように）
+      var q = '?k=' + encodeURIComponent(key) + (viewOnly ? '&r=v' : (p === 'punch' ? '&p=punch' : ''));
+      try { history.replaceState(null, '', location.pathname + q); } catch (e) {}
+    }
+
+    document.getElementById('tab-shift').addEventListener('click', function (e) { e.preventDefault(); if (page !== 'shift') show('shift'); });
+    document.getElementById('tab-punch').addEventListener('click', function (e) { e.preventDefault(); if (page !== 'punch') show('punch'); });
+
+    if (!viewOnly) tabs.className = 'on';
     frame.style.display = 'block';
     document.getElementById('note').style.display = 'none';
+    show(page);
   })();
 </script>
 </body>
